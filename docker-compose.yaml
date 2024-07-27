@@ -1,0 +1,51 @@
+version: '3'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://admin:postgres@db:5432/postgres
+    depends_on:
+      - db
+    command: uvicorn fastapi_app:create_app --factory --host 0.0.0.0 --port 8000 --reload
+
+  db:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/workspace
+    environment:
+      - DATABASE_URL=postgresql://admin:postgres@db:5432/postgres
+    command: python ./src/fastapi_app/setup_postgres_database.py
+
+  seed:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/workspace
+    environment:
+      - DATABASE_URL=postgresql://admin:postgres@db:5432/postgres
+    command: python ./src/fastapi_app/setup_postgres_seeddata.py
+
+volumes:
+  postgres-data:

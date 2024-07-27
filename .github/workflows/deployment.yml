@@ -1,0 +1,24 @@
+name: Build & Deploy
+on:
+  push:
+    branches: [master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Kefi Chat Deployment
+        uses: appleboy/ssh-action@v0.1.2
+        with:
+         host: ${{secrets.SSH_HOST}}
+         key: ${{secrets.SSH_KEY}}
+         username: ${{secrets.SSH_USERNAME}}
+
+         script: |
+           cd ../home/kefi_chat
+           git pull
+           echo 'pull successful'
+           git checkout master
+           systemctl restart nginx
+           echo 'Deployment successful'

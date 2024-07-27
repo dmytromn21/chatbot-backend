@@ -1,0 +1,5 @@
+-r src/requirements.txt
+ruff
+pre-commit
+pip-tools
+pip-compile-cross-platform
